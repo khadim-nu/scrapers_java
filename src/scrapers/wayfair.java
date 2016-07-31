@@ -13,30 +13,119 @@ import org.jsoup.select.Elements;
 /**
  *
  * @author raath
+ *
+ * http://stackoverflow.com/questions/819182/how-do-i-get-the-html-code-of-a-web-page-in-php
+ *
+ * https://developer.yahoo.com/yql/console/#h=select+*+from+html+where+url%3D%22http%3A%2F%2Fwww.wayfair.com%2F%22
  */
 public class wayfair {
 
     public static void main(String[] args) throws IOException {
-        // System.out.println("Marks started");
-        String url = "jdbc:mysql://localhost:3306/yazzoopa_scraper?useUnicode=true&characterEncoding=UTF-8";
+         System.out.println("wayfair.com started");
+        String url = "jdbc:mysql://localhost:3306/scrapers?useUnicode=true&characterEncoding=UTF-8";
         String username = "root";
         String password = "raath@aws";
 
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             //  System.out.println("Database connected");
             //////////////////////////
-            String siteurl = "http://www.wayfair.com/";
+            String u1 = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D'http%3A%2F%2F";
+            String u2 = "www.wayfair.com";
+            String u3 = "%2F'&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+
+            String siteurl = u1 + u2 + u3;
             Document doc = Jsoup.connect(siteurl)
                     .header("Accept-Encoding", "gzip, deflate")
                     .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
-                    .maxBodySize(0)
-                    .timeout(600000)
+                    .referrer("http://www.google.com")
+                    .timeout(12000)
+                    .followRedirects(true)
                     .get();
-            Elements products = null;
-            
-            System.out.println(doc.html());
 
-            System.exit(1);
+            Elements products = null;
+
+            //class="js-cms-link js-ss-click cms_add_link "
+            products = doc.getElementsByClass("nav_link_block_links");
+            int size = products.size();
+            System.out.println(products.size());
+            for (int i = 0; i < size; i++) {
+                Elements cat_anchors = products.get(i).getElementsByTag("a");
+                for (Element anchor : cat_anchors) {
+                    String cat_link = anchor.attr("href");
+                    System.out.println("========>>>>" + cat_link);
+                    cat_link = cat_link.replace("http://", "");
+                    siteurl = u1 + cat_link + u3;
+                    doc = Jsoup.connect(siteurl)
+                            .header("Accept-Encoding", "gzip, deflate")
+                            .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                            .referrer("http://www.google.com")
+                            .timeout(12000)
+                            .followRedirects(true)
+                            .get();
+
+                    Elements cats = doc.getElementsByClass("TextUnderImg");
+                    System.out.println(cats.size());
+                    for (Element cat : cats) {
+                        String sub_cat_link = cat.getElementsByTag("a").attr("href");
+                        sub_cat_link += "&itemsperpage=200";
+                        System.out.println(sub_cat_link);
+                        doc = Jsoup.connect(sub_cat_link)
+                                .header("Accept-Encoding", "gzip, deflate")
+                                .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                                .referrer("http://www.google.com")
+                                .timeout(120000)
+                                .followRedirects(true)
+                                .get();
+
+                        Elements items = doc.getElementsByClass("productbox");
+                        for (Element item : items) {
+                            String pUrl = item.attr("href");
+                            String ptitle = item.getElementsByClass("sb_names").text();
+                            String pprice = item.getElementsByClass("is_price_value").text();
+                            String pupc = item.attr("data-sku");
+                            String pimage = item.getElementsByTag("img").attr("src");
+                            String features = item.getElementsByClass("sb_prod_feature_list").get(0).html();
+                            
+                            pprice=pprice.replace("from", "");
+                            pprice=pprice.replace("Â", "");
+                            pprice=pprice.trim();
+                            
+                            pupc ="wayfair_"+pupc;
+                            
+                            try {
+                            ///// Deleting existing products ///
+                            String queryCheck = "DELETE FROM items WHERE p_id = ?";
+                            PreparedStatement st = connection.prepareStatement(queryCheck);
+                            st.setString(1, pupc);
+                            int rs = st.executeUpdate();
+                            //////////////////////
+
+                            Statement stmt = connection.createStatement();
+                            stmt.execute("set names 'utf8'");
+                            String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification)"
+                                    + "VALUES(?,?,?,?,?,?,?,?)";
+
+                            PreparedStatement pstmt = connection.prepareStatement(sql);
+                            // Set the values
+                            pstmt.setString(1, pupc);
+                            pstmt.setString(2, ptitle);
+                            pstmt.setInt(3, 1);
+                            pstmt.setString(4, pUrl);
+                            pstmt.setString(5, pprice);
+                            pstmt.setString(6, pimage);
+                            pstmt.setString(7, "");
+                            pstmt.setString(8, features);
+                            // Insert 
+                            pstmt.executeUpdate();
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                        }
+                    }
+//                    System.out.println(doc.html());
+//                    System.exit(1);
+                }
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
