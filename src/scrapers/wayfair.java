@@ -21,7 +21,7 @@ import org.jsoup.select.Elements;
 public class wayfair {
 
     public static void main(String[] args) throws IOException {
-         System.out.println("wayfair.com started");
+        System.out.println("wayfair.com started");
         String url = "jdbc:mysql://localhost:3306/scrapers?useUnicode=true&characterEncoding=UTF-8";
         String username = "root";
         String password = "raath@aws";
