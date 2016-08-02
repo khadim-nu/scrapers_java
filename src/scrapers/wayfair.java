@@ -47,83 +47,101 @@ public class wayfair {
             //class="js-cms-link js-ss-click cms_add_link "
             products = doc.getElementsByClass("nav_link_block_links");
             int size = products.size();
+            int productsTobeScraped = 100;
             System.out.println(products.size());
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size && productsTobeScraped > 0; i++) {
                 Elements cat_anchors = products.get(i).getElementsByTag("a");
                 for (Element anchor : cat_anchors) {
-                    String cat_link = anchor.attr("href");
-                    System.out.println("========>>>>" + cat_link);
-                    cat_link = cat_link.replace("http://", "");
-                    siteurl = u1 + cat_link + u3;
-                    doc = Jsoup.connect(siteurl)
-                            .header("Accept-Encoding", "gzip, deflate")
-                            .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
-                            .referrer("http://www.google.com")
-                            .timeout(12000)
-                            .followRedirects(true)
-                            .get();
-
-                    Elements cats = doc.getElementsByClass("TextUnderImg");
-                    System.out.println(cats.size());
-                    for (Element cat : cats) {
-                        String sub_cat_link = cat.getElementsByTag("a").attr("href");
-                        sub_cat_link += "&itemsperpage=200";
-                        System.out.println(sub_cat_link);
-                        doc = Jsoup.connect(sub_cat_link)
+                    if (productsTobeScraped > 0) {
+                        String cat_link = anchor.attr("href");
+                        System.out.println("========>>>>" + cat_link);
+                        cat_link = cat_link.replace("http://", "");
+                        siteurl = u1 + cat_link + u3;
+                        doc = Jsoup.connect(siteurl)
                                 .header("Accept-Encoding", "gzip, deflate")
                                 .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
                                 .referrer("http://www.google.com")
-                                .timeout(120000)
+                                .timeout(12000)
                                 .followRedirects(true)
                                 .get();
 
-                        Elements items = doc.getElementsByClass("productbox");
-                        for (Element item : items) {
-                            String pUrl = item.attr("href");
-                            String ptitle = item.getElementsByClass("sb_names").text();
-                            String pprice = item.getElementsByClass("is_price_value").text();
-                            String pupc = item.attr("data-sku");
-                            String pimage = item.getElementsByTag("img").attr("src");
-                            String features = item.getElementsByClass("sb_prod_feature_list").get(0).html();
-                            
-                            pprice=pprice.replace("from", "");
-                            pprice=pprice.replace("Â", "");
-                            pprice=pprice.trim();
-                            
-                            pupc ="wayfair_"+pupc;
-                            
-                            try {
-                            ///// Deleting existing products ///
-                            String queryCheck = "DELETE FROM items WHERE p_id = ?";
-                            PreparedStatement st = connection.prepareStatement(queryCheck);
-                            st.setString(1, pupc);
-                            int rs = st.executeUpdate();
-                            //////////////////////
+                        Elements cats = doc.getElementsByClass("TextUnderImg");
+                        System.out.println(cats.size());
+                        for (Element cat : cats) {
+                            if (productsTobeScraped > 0) {
+                                String sub_cat_link = cat.getElementsByTag("a").attr("href");
+                                sub_cat_link += "&itemsperpage=200";
+                                System.out.println(sub_cat_link);
+                                doc = Jsoup.connect(sub_cat_link)
+                                        .header("Accept-Encoding", "gzip, deflate")
+                                        .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                                        .referrer("http://www.google.com")
+                                        .timeout(120000)
+                                        .followRedirects(true)
+                                        .get();
 
-                            Statement stmt = connection.createStatement();
-                            stmt.execute("set names 'utf8'");
-                            String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification)"
-                                    + "VALUES(?,?,?,?,?,?,?,?)";
+                                Elements items = doc.getElementsByClass("productbox");
+                                for (Element item : items) {
+                                    if (productsTobeScraped > 0) {
+                                        String pUrl = item.attr("href");
+                                        String ptitle = item.getElementsByClass("sb_names").text();
+                                        String pprice = item.getElementsByClass("is_price_value").text();
+                                        String pupc = item.attr("data-sku");
+                                        String pimage = item.getElementsByTag("img").attr("src");
+                                        String features = item.getElementsByClass("sb_prod_feature_list").get(0).html();
 
-                            PreparedStatement pstmt = connection.prepareStatement(sql);
-                            // Set the values
-                            pstmt.setString(1, pupc);
-                            pstmt.setString(2, ptitle);
-                            pstmt.setInt(3, 1);
-                            pstmt.setString(4, pUrl);
-                            pstmt.setString(5, pprice);
-                            pstmt.setString(6, pimage);
-                            pstmt.setString(7, "");
-                            pstmt.setString(8, features);
-                            // Insert 
-                            pstmt.executeUpdate();
-                        } catch (Exception e) {
-                            System.out.println(e.getMessage());
-                        }
-                        }
-                    }
+                                        pprice = pprice.replace("from", "");
+                                        pprice = pprice.replace("Â", "");
+                                        pprice = pprice.trim();
+
+                                        pupc = "wayfair_" + pupc;
+
+                                        String temp_t[] = ptitle.split("by");
+
+                                        ptitle = temp_t[0];
+
+                                        try {
+                                            ///// Deleting existing products ///
+                                            String queryCheck = "DELETE FROM items WHERE p_id = ?";
+                                            PreparedStatement st = connection.prepareStatement(queryCheck);
+                                            st.setString(1, pupc);
+                                            int rs = st.executeUpdate();
+                                            //////////////////////
+
+                                            Statement stmt = connection.createStatement();
+                                            stmt.execute("set names 'utf8'");
+                                            String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification)"
+                                                    + "VALUES(?,?,?,?,?,?,?,?)";
+
+                                            PreparedStatement pstmt = connection.prepareStatement(sql);
+                                            // Set the values
+                                            pstmt.setString(1, pupc);
+                                            pstmt.setString(2, ptitle);
+                                            pstmt.setInt(3, 1);
+                                            pstmt.setString(4, pUrl);
+                                            pstmt.setString(5, pprice);
+                                            pstmt.setString(6, pimage);
+                                            pstmt.setString(7, "");
+                                            pstmt.setString(8, features);
+                                            // Insert 
+                                            pstmt.executeUpdate();
+                                            productsTobeScraped = productsTobeScraped - 1;
+                                        } catch (Exception e) {
+                                            System.out.println(e.getMessage());
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
 //                    System.out.println(doc.html());
 //                    System.exit(1);
+                        }
+                    } else {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
