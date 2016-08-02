@@ -38,7 +38,7 @@ public class wayfair {
                     .header("Accept-Encoding", "gzip, deflate")
                     .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
                     .referrer("http://www.google.com")
-                    .timeout(12000)
+                    .timeout(0)
                     .followRedirects(true)
                     .get();
 
@@ -61,7 +61,7 @@ public class wayfair {
                                 .header("Accept-Encoding", "gzip, deflate")
                                 .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
                                 .referrer("http://www.google.com")
-                                .timeout(12000)
+                                .timeout(0)
                                 .followRedirects(true)
                                 .get();
 
@@ -76,7 +76,7 @@ public class wayfair {
                                         .header("Accept-Encoding", "gzip, deflate")
                                         .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
                                         .referrer("http://www.google.com")
-                                        .timeout(120000)
+                                        .timeout(0)
                                         .followRedirects(true)
                                         .get();
 
@@ -95,10 +95,25 @@ public class wayfair {
                                         pprice = pprice.trim();
 
                                         pupc = "wayfair_" + pupc;
-
+                                        
                                         String temp_t[] = ptitle.split("by");
 
                                         ptitle = temp_t[0];
+                                        
+                                        String upcitemdbURL="http://www.upcitemdb.com/query?s=";
+                                        upcitemdbURL +=ptitle+"&type=2";
+                                        ///////////////
+                                        doc = Jsoup.connect(upcitemdbURL)
+                                        .header("Accept-Encoding", "gzip, deflate")
+                                        .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                                        .referrer("http://www.google.com")
+                                        .timeout(0)
+                                        .followRedirects(true)
+                                        .get();
+                                        String upc_code=doc.getElementsByClass("rImage").get(0).getElementsByTag("a").text();
+//                                        System.out.println(upc_code);
+//                                        System.exit(1);
+                                        //////////////////
 
                                         try {
                                             ///// Deleting existing products ///
@@ -110,8 +125,8 @@ public class wayfair {
 
                                             Statement stmt = connection.createStatement();
                                             stmt.execute("set names 'utf8'");
-                                            String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification)"
-                                                    + "VALUES(?,?,?,?,?,?,?,?)";
+                                            String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification,upc)"
+                                                    + "VALUES(?,?,?,?,?,?,?,?,?)";
 
                                             PreparedStatement pstmt = connection.prepareStatement(sql);
                                             // Set the values
@@ -123,6 +138,7 @@ public class wayfair {
                                             pstmt.setString(6, pimage);
                                             pstmt.setString(7, "");
                                             pstmt.setString(8, features);
+                                            pstmt.setString(9, upc_code);
                                             // Insert 
                                             pstmt.executeUpdate();
                                             productsTobeScraped = productsTobeScraped - 1;
