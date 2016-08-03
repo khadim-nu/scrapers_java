@@ -47,8 +47,7 @@ public class wayfair {
             //class="js-cms-link js-ss-click cms_add_link "
             products = doc.getElementsByClass("nav_link_block_links");
             int size = products.size();
-            int productsTobeScraped = 100;
-            System.out.println(products.size());
+            int productsTobeScraped = 50000;
             for (int i = 0; i < size && productsTobeScraped > 0; i++) {
                 Elements cat_anchors = products.get(i).getElementsByTag("a");
                 for (Element anchor : cat_anchors) {
@@ -84,6 +83,7 @@ public class wayfair {
                                                 .get();
 
                                         Elements items = doc.getElementsByClass("productbox");
+                                        String category_title=doc.getElementsByTag("title").text().split("|")[0];
                                         for (Element item : items) {
                                             if (productsTobeScraped > 0) {
                                                 String pUrl = item.attr("href");
@@ -106,56 +106,64 @@ public class wayfair {
                                                 String upcitemdbURL = "http://www.upcitemdb.com/query?s=";
                                                 upcitemdbURL += ptitle + "&type=2";
                                                 ///////////////
-                                                doc = Jsoup.connect(upcitemdbURL)
-                                                        .header("Accept-Encoding", "gzip, deflate")
-                                                        .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
-                                                        .referrer("http://www.google.com")
-                                                        .timeout(0)
-                                                        .followRedirects(true)
-                                                        .get();
-                                                String upc_code = doc.getElementsByClass("rImage").get(0).getElementsByTag("a").text();
+                                                try {
+                                                    doc = Jsoup.connect(upcitemdbURL)
+                                                            .header("Accept-Encoding", "gzip, deflate")
+                                                            .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                                                            .referrer("http://www.google.com")
+                                                            .timeout(0)
+                                                            .ignoreContentType(true).ignoreHttpErrors(true)
+                                                            .get();
+                                                    String upc_code = doc.getElementsByClass("rImage").get(0).getElementsByTag("a").text();
 //                                        System.out.println(upc_code);
 //                                        System.exit(1);
-                                                //////////////////
+                                                    //////////////////
 
-                                                try {
+                                                    try {
 
-                                                    ///// Deleting existing products ///
-                                                    String queryCheck = "DELETE FROM items WHERE p_id = ?";
-                                                    PreparedStatement st = connection.prepareStatement(queryCheck);
-                                                    st.setString(1, pupc);
-                                                    int rs = st.executeUpdate();
-                                                    //////////////////////
+                                                        ///// Deleting existing products ///
+                                                        String queryCheck = "DELETE FROM items WHERE p_id = ?";
+                                                        PreparedStatement st = connection.prepareStatement(queryCheck);
+                                                        st.setString(1, pupc);
+                                                        int rs = st.executeUpdate();
+                                                        //////////////////////
 
-                                                    Statement stmt = connection.createStatement();
-                                                    stmt.execute("set names 'utf8'");
-                                                    String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification,upc)"
-                                                            + "VALUES(?,?,?,?,?,?,?,?,?)";
+                                                        Statement stmt = connection.createStatement();
+                                                        stmt.execute("set names 'utf8'");
+                                                        String sql = "INSERT INTO items (p_id,title,status,link,price,image_url,description,specification,upc,category_title)"
+                                                                + "VALUES(?,?,?,?,?,?,?,?,?,?)";
 
-                                                    PreparedStatement pstmt = connection.prepareStatement(sql);
-                                                    // Set the values
-                                                    pstmt.setString(1, pupc);
-                                                    pstmt.setString(2, ptitle);
-                                                    pstmt.setInt(3, 1);
-                                                    pstmt.setString(4, pUrl);
-                                                    pstmt.setString(5, pprice);
-                                                    pstmt.setString(6, pimage);
-                                                    pstmt.setString(7, "");
-                                                    pstmt.setString(8, features);
-                                                    pstmt.setString(9, upc_code);
-                                                    // Insert 
-                                                    pstmt.executeUpdate();
-                                                    productsTobeScraped = productsTobeScraped - 1;
+                                                        PreparedStatement pstmt = connection.prepareStatement(sql);
+                                                        // Set the values
+                                                        pstmt.setString(1, pupc);
+                                                        pstmt.setString(2, ptitle);
+                                                        pstmt.setInt(3, 1);
+                                                        pstmt.setString(4, pUrl);
+                                                        pstmt.setString(5, pprice);
+                                                        pstmt.setString(6, pimage);
+                                                        pstmt.setString(7, "");
+                                                        pstmt.setString(8, features);
+                                                        pstmt.setString(9, upc_code);
+                                                        pstmt.setString(10, category_title);
+                                                        // Insert 
+                                                        pstmt.executeUpdate();
+                                                        productsTobeScraped = productsTobeScraped - 1;
+                                                    } catch (Exception e) {
+                                                        System.out.println("DB error");
+                                                        System.out.println(e.getMessage());
+                                                        System.out.println(sub_cat_link);
+                                                    }
                                                 } catch (Exception e) {
-                                                    System.out.println("DB error");
-                                                    System.out.println(sub_cat_link);
+                                                    System.out.println("UPC error");
+                                                    System.out.println(e.getMessage());
+                                                    System.out.println(upcitemdbURL);
                                                 }
                                             } else {
                                                 break;
                                             }
                                         }
                                     } catch (Exception e) {
-                                        System.out.println("Suc Category Error");
+                                        System.out.println("Sub Cat Error");
                                         System.out.println(sub_cat_link);
                                     }
                                 } else {
