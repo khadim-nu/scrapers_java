@@ -83,7 +83,7 @@ public class wayfair {
                                                 .get();
 
                                         Elements items = doc.getElementsByClass("productbox");
-                                        String category_title=doc.getElementsByTag("title").text().split("|")[0];
+                                        String category_title = doc.getElementsByTag("title").text().split("|")[0];
                                         for (Element item : items) {
                                             if (productsTobeScraped > 0) {
                                                 String pUrl = item.attr("href");
@@ -148,6 +148,11 @@ public class wayfair {
                                                         // Insert 
                                                         pstmt.executeUpdate();
                                                         productsTobeScraped = productsTobeScraped - 1;
+                                                        try {
+                                                            Thread.sleep(50000);
+                                                        } catch (InterruptedException ie) {
+                                                            System.out.println(ie.getMessage());
+                                                        }
                                                     } catch (Exception e) {
                                                         System.out.println("DB error");
                                                         System.out.println(e.getMessage());
