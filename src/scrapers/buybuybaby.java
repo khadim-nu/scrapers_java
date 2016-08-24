@@ -19,6 +19,14 @@ import org.jsoup.select.Elements;
  * https://developer.yahoo.com/yql/console/#h=select+*+from+html+where+url%3D%22http%3A%2F%2Fwww.wayfair.com%2F%22
  */
 public class buybuybaby {
+    
+    public static String getTitlePart(String[] data, int index){
+    try{
+      return data[index];
+    } catch(ArrayIndexOutOfBoundsException e){
+      return "";
+    }
+}
 
     public static void main(String[] args) throws IOException {
         System.out.println("buybuybaby.com started");
@@ -29,7 +37,31 @@ public class buybuybaby {
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
 
             String siteurl[] = {
-                "http://www.buybuybaby.com/store/category/furniture/32609/", //                "http://www.buybuybaby.com/store/category/strollers/32571/",
+                "http://www.buybuybaby.com/store/category/furniture/32609/", 
+                "http://www.buybuybaby.com/store/category/gifts-more/personalized-gifts/room-decor/32755/",
+                "http://www.buybuybaby.com/store/category/health-safety/baby-monitors/video-monitors/32479/",
+                "http://www.buybuybaby.com/store/category/health-safety/baby-monitors/audio-monitors/32480/",
+                "http://www.buybuybaby.com/store/category/health-safety/baby-monitors/movement-monitors/32481/",
+                "http://www.buybuybaby.com/store/category/health-safety/baby-monitors/wifi-monitors/32482/",
+                
+                "http://www.buybuybaby.com/store/category/health-safety/baby-monitors/wifi-monitors/32482/",
+                "http://www.buybuybaby.com/store/category/toys-learning/books-media/books/32112/",
+                "http://www.buybuybaby.com/store/category/toys-learning/books-media/music/32244/",
+                "http://www.buybuybaby.com/store/category/toys-learning/books-media/activity-books/32791/",
+                "http://www.buybuybaby.com/store/category/toys-learning/books-media/movies-dvd/32243/",
+                "http://www.buybuybaby.com/store/category/clothing-accessories/girls-clothing-newborn-4t/girls-tops-sweaters/32336/",
+                "http://www.buybuybaby.com/store/category/clothing-accessories/girls-clothing-newborn-4t/girls-sets/32353/",
+                "http://www.buybuybaby.com/store/category/clothing-accessories/girls-clothing-newborn-4t/skirts-dresses/32476/",
+                "http://www.buybuybaby.com/store/category/clothing-accessories/girls-clothing-newborn-4t/girls-athletic/32355/",
+                "http://www.buybuybaby.com/store/category/gifts-more/smart-innovations/gear-travel/32706/",
+                "http://www.buybuybaby.com/store/category/gifts-more/smart-innovations/nursing-feeding/32707/",
+                "http://www.buybuybaby.com/store/category/gifts-more/smart-innovations/bath-potty/32708/",
+                "http://www.buybuybaby.com/store/category/gifts-more/smart-innovations/health-safety/32709/",
+                "http://www.buybuybaby.com/store/category/gifts-more/team-shop/collegiate/32671/",
+                "http://www.buybuybaby.com/store/category/gifts-more/baby-shower-gifts-favors/baby-shower-favors/32661/",
+                "http://www.buybuybaby.com/store/category/gifts-more/gifts-by-recipient/gifts-for-infants/32677/",
+                
+               "http://www.buybuybaby.com/store/category/strollers/32571/",
                             "http://www.buybuybaby.com/store/category/car-seats/32592/",
                             "http://www.buybuybaby.com/store/category/gear-travel/infant-activity/30505/",
                             "http://www.buybuybaby.com/store/category/nursing-feeding/30009/",
@@ -57,17 +89,26 @@ public class buybuybaby {
                                 .timeout(0)
                                 .followRedirects(true)
                                 .get();
-                        System.out.println(caturl);
+                        
                         Elements products = doc.getElementsByClass("productContent");
+                        System.out.println(products.size());
                         for (Element product : products) {
                             String img = product.getElementsByTag("img").attr("data-lazyloadsrc");
                             String title = product.getElementsByClass("prodName").get(0).getElementsByTag("a").text();
                             String link = product.getElementsByClass("prodName").get(0).getElementsByTag("a").attr("href");
                             String price = product.getElementsByClass("isPrice").get(0).text();
                             String id = product.getElementsByTag("input").attr("data-productid");
-
+                            
+                            title =title.replaceAll("[^a-zA-Z ]", "");
+                            String parts[]=title.split(" ");
+                            String upcTitle =getTitlePart(parts,0);
+                            upcTitle +=" "+getTitlePart(parts,1);
+                            upcTitle +=" "+getTitlePart(parts,2);
+                            upcTitle +=" "+getTitlePart(parts,3);
+                            upcTitle +=" "+getTitlePart(parts,4);
+                          
                             String upcitemdbURL = "http://www.upcitemdb.com/query?s=";
-                            upcitemdbURL += title + "&type=2";
+                            upcitemdbURL += upcTitle + "&type=2";
                             ///////////////
                             doc = Jsoup.connect(upcitemdbURL)
                                     .header("Accept-Encoding", "gzip, deflate")
@@ -119,7 +160,7 @@ public class buybuybaby {
                                 System.out.println("Inserted");
 
                                 try {
-                                    Thread.sleep(50000);
+                                    Thread.sleep(10000);
                                 } catch (InterruptedException ie) {
                                    System.out.println(ie.getMessage());
                                 }
@@ -129,7 +170,9 @@ public class buybuybaby {
                             }
                         }
                     } catch (Exception e) {
-
+                        System.out.println("Category URL Error");
+                        System.out.println(caturl);
+                        System.out.println(e.getMessage());
                     }
                 }
             }

@@ -47,7 +47,7 @@ public class wayfair {
             //class="js-cms-link js-ss-click cms_add_link "
             products = doc.getElementsByClass("nav_link_block_links");
             int size = products.size();
-            int productsTobeScraped = 50000;
+            int productsTobeScraped = 5000000;
             for (int i = 0; i < size && productsTobeScraped > 0; i++) {
                 Elements cat_anchors = products.get(i).getElementsByTag("a");
                 for (Element anchor : cat_anchors) {
@@ -149,7 +149,7 @@ public class wayfair {
                                                         pstmt.executeUpdate();
                                                         productsTobeScraped = productsTobeScraped - 1;
                                                         try {
-                                                            Thread.sleep(50000);
+                                                            Thread.sleep(10000);
                                                         } catch (InterruptedException ie) {
                                                             System.out.println(ie.getMessage());
                                                         }
