@@ -36,7 +36,7 @@ public class gumtree implements Runnable {
 
         String url = "jdbc:mysql://localhost:3306/byetback?useUnicode=true&characterEncoding=UTF-8";
         String username = "root";
-        String password = "raath";
+        String password = "incubasys";
         try {
             connection = DriverManager.getConnection(url, username, password);
             System.out.println("connected successfully");;
@@ -59,7 +59,7 @@ public class gumtree implements Runnable {
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs;
-            
+
             rs = stmt.executeQuery("SELECT * FROM urls WHERE tag = '" + tag + "' AND id >= " + pageFrom + " AND id < " + pageTo + " AND status=1 order by id");
 
             String domainURL = "";
@@ -74,7 +74,7 @@ public class gumtree implements Runnable {
 
                 for (int i = 1; keepRunnung; i++) {
 
-                    System.out.println(domainURL);
+                    System.out.println("linkId:" + rs.getInt("id") + " => " + domainURL);
 
                     Document doc = Jsoup.connect(domainURL)
                             .header("Accept-Encoding", "gzip, deflate")
@@ -95,18 +95,20 @@ public class gumtree implements Runnable {
 
                     if (doc.getElementsByClass("pagination-next").size() > 0) {
                         domainURL = "https://www.gumtree.com" + doc.getElementsByClass("pagination-next").get(0).getElementsByTag("a").attr("href");
-                        /// Deleting existing products ///
-                        String uqueryCheck = "UPDATE urls SET status = 0 WHERE id = ?";
-                        PreparedStatement ust = connection.prepareStatement(uqueryCheck);
-                        ust.setInt(1, rs.getInt("id"));
-                        int urst = ust.executeUpdate();
-                        /////////////////////////////     
+
                     } else {
                         domainURL = "";
                     }
                     //stoping condition
                     if (domainURL.isEmpty() || i >= 50) {
                         keepRunnung = false;
+                        
+                        /// Deleting existing products ///
+                        String uqueryCheck = "UPDATE urls SET status = 0 WHERE id = ?";
+                        PreparedStatement ust = connection.prepareStatement(uqueryCheck);
+                        ust.setInt(1, rs.getInt("id"));
+                        int urst = ust.executeUpdate();
+                        /////////////////////////////  
                     }
 
                     System.out.println(size);
