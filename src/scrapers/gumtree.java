@@ -80,7 +80,7 @@ public class gumtree implements Runnable {
                             .header("Accept-Encoding", "gzip, deflate")
                             .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
                             .referrer("http://www.google.com")
-                            .timeout(12000)
+                            .timeout(1200000)
                             .followRedirects(true)
                             .get();
 
@@ -125,7 +125,7 @@ public class gumtree implements Runnable {
                                         .header("Accept-Encoding", "gzip, deflate")
                                         .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
                                         .referrer("http://www.google.com")
-                                        .timeout(12000)
+                                        .timeout(1200000)
                                         .followRedirects(true)
                                         .get();
 
@@ -155,7 +155,7 @@ public class gumtree implements Runnable {
                                             .header("x-gumtree-token", token)
                                             .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 Safari/537.36")
                                             .referrer("https://www.gumtree.com/p/samsung/samsung-galaxy-s7-32gb-unlocked-gold-or-silver-or-black-very-good-condition-with-warranty-/1199706972")
-                                            .timeout(12000)
+                                            .timeout(1200000)
                                             .followRedirects(true)
                                             .get();
                                     contact = tdoc.text().split("\"")[7];
