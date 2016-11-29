@@ -15,6 +15,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import static java.nio.charset.StandardCharsets.*;
 
 /**
  *
@@ -29,6 +30,7 @@ public class gumtree implements Runnable {
     int pageTo;
 
     public gumtree(String tag, int pagefrom, int pageto) {
+
         this.pageFrom = pagefrom;
         this.pageTo = pageto;
 
@@ -36,7 +38,7 @@ public class gumtree implements Runnable {
 
         String url = "jdbc:mysql://localhost:3306/byetback?useUnicode=true&characterEncoding=UTF-8";
         String username = "root";
-        String password = "incubasys";
+        String password = "raath@aws";
         try {
             connection = DriverManager.getConnection(url, username, password);
             System.out.println("connected successfully");;
@@ -102,7 +104,7 @@ public class gumtree implements Runnable {
                     //stoping condition
                     if (domainURL.isEmpty() || i >= 50) {
                         keepRunnung = false;
-                        
+
                         /// Deleting existing products ///
                         String uqueryCheck = "UPDATE urls_jobs SET status = 0 WHERE id = ?";
                         PreparedStatement ust = connection.prepareStatement(uqueryCheck);
@@ -117,6 +119,8 @@ public class gumtree implements Runnable {
 
                         String adLink = URL.attr("href");
                         if (!adLink.isEmpty()) {
+
+                            adLink = adLink.replaceAll("\\?", "%C2%A3");
                             adLink = "https://www.gumtree.com" + adLink;
                             // System.out.println(adLink);
 //                   
@@ -203,8 +207,18 @@ public class gumtree implements Runnable {
 
 //                                     System.exit(1);
                             } catch (Exception e) {
-                                System.out.println(e.getMessage());
-                                System.out.println("Page Fetch Error.");
+                                Statement stmtInsert = connection.createStatement();
+                                stmtInsert.execute("set names 'utf8mb4'");
+                                String sql = "INSERT INTO urls_jobs (url, tag, status)"
+                                        + "VALUES(?,?,?)";
+
+                                PreparedStatement pstmt = connection.prepareStatement(sql);
+                                // Set the values
+                                pstmt.setString(1, adLink);
+                                pstmt.setString(2, tag);
+                                pstmt.setInt(3, 2);
+                                System.out.println("------" + e.getMessage() + "------");
+                                System.out.println("");
                             }
                         }
 

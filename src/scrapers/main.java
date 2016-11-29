@@ -1,6 +1,8 @@
 package scrapers;
 
 import java.io.IOException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 /**
  *
@@ -13,6 +15,7 @@ import java.io.IOException;
 public class main {
 
     public static void main(String[] args) throws IOException {
+
         String tag = "jobs";
 
         int pageFrom = 0;
@@ -25,7 +28,7 @@ public class main {
 
         // 16 , 16+50
         //16+50 , 16
-        int increment = 100;
+        int increment = 50;
 
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
@@ -67,8 +70,59 @@ public class main {
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
         
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
         
-         pageFrom = pageTo;
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
 
@@ -87,6 +141,16 @@ public class main {
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+        
+        
         System.out.println(pageFrom);
         System.out.println(pageTo);
         // System.exit(1);
