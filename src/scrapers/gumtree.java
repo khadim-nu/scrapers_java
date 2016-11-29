@@ -38,7 +38,7 @@ public class gumtree implements Runnable {
 
         String url = "jdbc:mysql://localhost:3306/byetback?useUnicode=true&characterEncoding=UTF-8";
         String username = "root";
-        String password = "raath@aws";
+        String password = "incubasys";
         try {
             connection = DriverManager.getConnection(url, username, password);
             System.out.println("connected successfully");;
@@ -217,8 +217,8 @@ public class gumtree implements Runnable {
                                 pstmt.setString(1, adLink);
                                 pstmt.setString(2, tag);
                                 pstmt.setInt(3, 2);
+                                 pstmt.executeUpdate();
                                 System.out.println("------" + e.getMessage() + "------");
-                                System.out.println("");
                             }
                         }
 
