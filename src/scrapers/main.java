@@ -16,7 +16,7 @@ public class main {
 
     public static void main(String[] args) throws IOException {
 
-        String tag = "for-sale";
+        String tag = "jobs";
 
         int pageFrom = 0;
         int pageTo = 0;
