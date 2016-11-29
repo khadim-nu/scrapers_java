@@ -57,12 +57,12 @@ public class gumtree implements Runnable {
 //                String u3 = "%2F'&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
         boolean keepRunnung = false;
 
-        // fetching urls_jobs from DB
+        // fetching urls from DB
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs;
 
-            rs = stmt.executeQuery("SELECT * FROM urls_jobs WHERE tag = '" + tag + "' AND id >= " + pageFrom + " AND id < " + pageTo + " AND status=1 order by id");
+            rs = stmt.executeQuery("SELECT * FROM urls WHERE tag = '" + tag + "' AND id >= " + pageFrom + " AND id < " + pageTo + " AND status=1 order by id");
 
             String domainURL = "";
 
@@ -106,7 +106,7 @@ public class gumtree implements Runnable {
                         keepRunnung = false;
 
                         /// Deleting existing products ///
-                        String uqueryCheck = "UPDATE urls_jobs SET status = 0 WHERE id = ?";
+                        String uqueryCheck = "UPDATE urls SET status = 0 WHERE id = ?";
                         PreparedStatement ust = connection.prepareStatement(uqueryCheck);
                         ust.setInt(1, rs.getInt("id"));
                         int urst = ust.executeUpdate();
@@ -174,7 +174,7 @@ public class gumtree implements Runnable {
                                 String adText = doc.getElementsByClass("ad-description").get(0).text();
 
 //                            ///// Deleting existing products ///
-                                String queryCheck = "DELETE FROM jobs WHERE ad_id = ?";
+                                String queryCheck = "DELETE FROM items WHERE ad_id = ?";
                                 PreparedStatement st = connection.prepareStatement(queryCheck);
                                 st.setString(1, ad_id);
                                 int rst = st.executeUpdate();
@@ -183,7 +183,7 @@ public class gumtree implements Runnable {
                                 try {
                                     Statement stmtInsert = connection.createStatement();
                                     stmtInsert.execute("set names 'utf8mb4'");
-                                    String sql = "INSERT INTO jobs (ad_id,name,contact,ad_title,address,source_link,category,adText,other)"
+                                    String sql = "INSERT INTO items (ad_id,name,contact,ad_title,address,source_link,category,adText,other)"
                                             + "VALUES(?,?,?,?,?,?,?,?,?)";
 
                                     PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -209,7 +209,7 @@ public class gumtree implements Runnable {
                             } catch (Exception e) {
                                 Statement stmtInsert = connection.createStatement();
                                 stmtInsert.execute("set names 'utf8mb4'");
-                                String sql = "INSERT INTO urls_jobs (url, tag, status)"
+                                String sql = "INSERT INTO urls (url, tag, status)"
                                         + "VALUES(?,?,?)";
 
                                 PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -236,7 +236,7 @@ public class gumtree implements Runnable {
         ///// Deleting existing products ///
         try {
             if (!tag.isEmpty()) {
-                String queryCheck = "DELETE FROM urls_jobs WHERE tag = ?";
+                String queryCheck = "DELETE FROM urls WHERE tag = ?";
                 PreparedStatement st = connection.prepareStatement(queryCheck);
                 st.setString(1, tag);
                 int rs = st.executeUpdate();
@@ -339,7 +339,7 @@ public class gumtree implements Runnable {
             try {
                 Statement stmtInsert = connection.createStatement();
                 stmtInsert.execute("set names 'utf8'");
-                String sql = "INSERT INTO urls_jobs (url,tag)"
+                String sql = "INSERT INTO urls (url,tag)"
                         + "VALUES(?,?)";
 
                 PreparedStatement pstmt = connection.prepareStatement(sql);

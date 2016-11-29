@@ -16,7 +16,7 @@ public class main {
 
     public static void main(String[] args) throws IOException {
 
-        String tag = "jobs";
+        String tag = "for_sale";
 
         int pageFrom = 0;
         int pageTo = 0;
@@ -28,7 +28,7 @@ public class main {
 
         // 16 , 16+50
         //16+50 , 16
-        int increment = 50;
+        int increment = 100;
 
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
