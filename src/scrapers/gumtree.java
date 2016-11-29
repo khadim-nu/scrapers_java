@@ -217,7 +217,7 @@ public class gumtree implements Runnable {
                                 pstmt.setString(1, adLink);
                                 pstmt.setString(2, tag);
                                 pstmt.setInt(3, 2);
-                                 pstmt.executeUpdate();
+                                pstmt.executeUpdate();
                                 System.out.println("------" + e.getMessage() + "------");
                             }
                         }
