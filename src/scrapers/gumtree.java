@@ -16,6 +16,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import static java.nio.charset.StandardCharsets.*;
+import java.sql.SQLException;
 
 /**
  *
@@ -26,10 +27,16 @@ public class gumtree implements Runnable {
     Connection connection;
     private String tag;
     private Thread t;
+    private String urlsTable;
+    private String ItemsTable;
     int pageFrom;
     int pageTo;
 
     public gumtree(String tag, int pagefrom, int pageto) {
+        String password = "incubasys";
+
+        this.urlsTable = "urls";
+        this.ItemsTable = "items";
 
         this.pageFrom = pagefrom;
         this.pageTo = pageto;
@@ -38,7 +45,7 @@ public class gumtree implements Runnable {
 
         String url = "jdbc:mysql://localhost:3306/byetback?useUnicode=true&characterEncoding=UTF-8";
         String username = "root";
-        String password = "incubasys";
+
         try {
             connection = DriverManager.getConnection(url, username, password);
             System.out.println("connected successfully");;
@@ -62,7 +69,7 @@ public class gumtree implements Runnable {
             Statement stmt = connection.createStatement();
             ResultSet rs;
 
-            rs = stmt.executeQuery("SELECT * FROM urls WHERE tag = '" + tag + "' AND id >= " + pageFrom + " AND id < " + pageTo + " AND status=1 order by id");
+            rs = stmt.executeQuery("SELECT * FROM " + this.urlsTable + " WHERE tag = '" + tag + "' AND id >= " + pageFrom + " AND id < " + pageTo + " AND status=1 order by id");
 
             String domainURL = "";
 
@@ -106,7 +113,7 @@ public class gumtree implements Runnable {
                         keepRunnung = false;
 
                         /// Deleting existing products ///
-                        String uqueryCheck = "UPDATE urls SET status = 0 WHERE id = ?";
+                        String uqueryCheck = "UPDATE " + this.urlsTable + " SET status = 0 WHERE id = ?";
                         PreparedStatement ust = connection.prepareStatement(uqueryCheck);
                         ust.setInt(1, rs.getInt("id"));
                         int urst = ust.executeUpdate();
@@ -122,104 +129,7 @@ public class gumtree implements Runnable {
 
                             adLink = adLink.replaceAll("\\?", "%C2%A3");
                             adLink = "https://www.gumtree.com" + adLink;
-                            // System.out.println(adLink);
-//                   
-                            try {
-                                doc = Jsoup.connect(adLink)
-                                        .header("Accept-Encoding", "gzip, deflate")
-                                        .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
-                                        .referrer("http://www.google.com")
-                                        .timeout(1200000)
-                                        .followRedirects(true)
-                                        .get();
-
-                                ///// pause ///////
-                                // try {
-                                //     Thread.sleep(1000);
-                                // } catch (InterruptedException ex) {
-                                //     Thread.currentThread().interrupt();
-                                // }
-                                //////
-                                String ad_id = doc.getElementById("reportForm.advertId-1").attr("value");
-
-                                String name = doc.getElementsByClass("space-mbn").get(0).text();
-
-                                String contact = "";
-
-                                ////////////
-                                String token = doc.html().split("revealSellerTelephoneNumberToken")[1].split("\"")[2];
-                                String ajaxUrl = "https://www.gumtree.com/ajax/account/seller/reveal/number/" + ad_id;
-
-                                try {
-                                    Document tdoc = Jsoup.connect(ajaxUrl)
-                                            .header("Accept-Encoding", "gzip, deflate, sdch, br")
-                                            .header("accept", "application/json, text/javascript, */*; q=0.01")
-                                            .header("accept-language", "en-US,en;q=0.8")
-                                            .ignoreContentType(true)
-                                            .header("x-gumtree-token", token)
-                                            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 Safari/537.36")
-                                            .referrer("https://www.gumtree.com/p/samsung/samsung-galaxy-s7-32gb-unlocked-gold-or-silver-or-black-very-good-condition-with-warranty-/1199706972")
-                                            .timeout(1200000)
-                                            .followRedirects(true)
-                                            .get();
-                                    contact = tdoc.text().split("\"")[7];
-                                } catch (Exception e) {
-
-                                }
-                                ///////////////
-                                String adTitle = doc.getElementsByClass("space-mbs").get(0).getElementsByTag("h1").get(0).text();
-
-                                String address = doc.getElementsByClass("space-mbs").get(0).getElementsByClass("ad-location").get(0).text();
-
-                                String adText = doc.getElementsByClass("ad-description").get(0).text();
-
-//                            ///// Deleting existing products ///
-                                String queryCheck = "DELETE FROM items WHERE ad_id = ?";
-                                PreparedStatement st = connection.prepareStatement(queryCheck);
-                                st.setString(1, ad_id);
-                                int rst = st.executeUpdate();
-                                /////////////////////////////
-
-                                try {
-                                    Statement stmtInsert = connection.createStatement();
-                                    stmtInsert.execute("set names 'utf8mb4'");
-                                    String sql = "INSERT INTO items (ad_id,name,contact,ad_title,address,source_link,category,adText,other)"
-                                            + "VALUES(?,?,?,?,?,?,?,?,?)";
-
-                                    PreparedStatement pstmt = connection.prepareStatement(sql);
-                                    // Set the values
-                                    pstmt.setString(1, ad_id);
-                                    pstmt.setString(2, name);
-                                    pstmt.setString(3, contact);
-                                    pstmt.setString(4, adTitle);
-                                    pstmt.setString(5, address);
-                                    pstmt.setString(6, adLink);
-                                    pstmt.setString(7, domainURL_old);
-                                    pstmt.setString(8, adText);
-                                    pstmt.setString(9, tag);
-                                    // Insert 
-                                    pstmt.executeUpdate();
-
-                                } catch (Exception e) {
-                                    System.out.println(e.getMessage());
-                                    System.out.println("DB Error.");
-                                }
-
-//                                     System.exit(1);
-                            } catch (Exception e) {
-                                Statement stmtInsert = connection.createStatement();
-                                stmtInsert.execute("set names 'utf8mb4'");
-                                String sql = "INSERT INTO urls (url, tag, status)"
-                                        + "VALUES(?,?,?)";
-
-                                PreparedStatement pstmt = connection.prepareStatement(sql);
-                                // Set the values
-                                pstmt.setString(1, adLink);
-                                pstmt.setString(2, tag);
-                                pstmt.setInt(3, 2);
-                                pstmt.executeUpdate();
-                                System.out.println("------" + e.getMessage() + "------");
-                            }
+                            scrapeSingleUrl(adLink, domainURL_old);
                         }
 
                     }
@@ -232,11 +142,104 @@ public class gumtree implements Runnable {
 
     }
 
+    public void scrapeSingleUrl(String adLink, String domainURL_old) throws SQLException {
+        Document doc;
+        try {
+            doc = Jsoup.connect(adLink)
+                    .header("Accept-Encoding", "gzip, deflate")
+                    .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                    .referrer("http://www.google.com")
+                    .timeout(1200000)
+                    .followRedirects(true)
+                    .get();
+
+            String ad_id = doc.getElementById("reportForm.advertId-1").attr("value");
+
+            String name = doc.getElementsByClass("space-mbn").get(0).text();
+
+            String contact = "";
+
+            ////////////
+            String token = doc.html().split("revealSellerTelephoneNumberToken")[1].split("\"")[2];
+            String ajaxUrl = "https://www.gumtree.com/ajax/account/seller/reveal/number/" + ad_id;
+
+            try {
+                Document tdoc = Jsoup.connect(ajaxUrl)
+                        .header("Accept-Encoding", "gzip, deflate, sdch, br")
+                        .header("accept", "application/json, text/javascript, */*; q=0.01")
+                        .header("accept-language", "en-US,en;q=0.8")
+                        .ignoreContentType(true)
+                        .header("x-gumtree-token", token)
+                        .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 Safari/537.36")
+                        .referrer("https://www.gumtree.com/p/samsung/samsung-galaxy-s7-32gb-unlocked-gold-or-silver-or-black-very-good-condition-with-warranty-/1199706972")
+                        .timeout(1200000)
+                        .followRedirects(true)
+                        .get();
+                contact = tdoc.text().split("\"")[7];
+            } catch (Exception e) {
+
+            }
+            ///////////////
+            String adTitle = doc.getElementsByClass("space-mbs").get(0).getElementsByTag("h1").get(0).text();
+
+            String address = doc.getElementsByClass("space-mbs").get(0).getElementsByClass("ad-location").get(0).text();
+
+            String adText = doc.getElementsByClass("ad-description").get(0).text();
+
+//                            ///// Deleting existing products ///
+            String queryCheck = "DELETE FROM " + this.ItemsTable + " WHERE ad_id = ?";
+            PreparedStatement st = connection.prepareStatement(queryCheck);
+            st.setString(1, ad_id);
+            int rst = st.executeUpdate();
+/////////////////////////////
+
+            try {
+                Statement stmtInsert = connection.createStatement();
+                stmtInsert.execute("set names 'utf8mb4'");
+                String sql = "INSERT INTO " + this.ItemsTable + " (ad_id,name,contact,ad_title,address,source_link,category,adText,other)"
+                        + "VALUES(?,?,?,?,?,?,?,?,?)";
+
+                PreparedStatement pstmt = connection.prepareStatement(sql);
+                // Set the values
+                pstmt.setString(1, ad_id);
+                pstmt.setString(2, name);
+                pstmt.setString(3, contact);
+                pstmt.setString(4, adTitle);
+                pstmt.setString(5, address);
+                pstmt.setString(6, adLink);
+                pstmt.setString(7, domainURL_old);
+                pstmt.setString(8, adText);
+                pstmt.setString(9, tag);
+                // Insert
+                pstmt.executeUpdate();
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.out.println("DB Error.");
+            }
+
+//                                     System.exit(1);
+        } catch (Exception e) {
+            Statement stmtInsert = connection.createStatement();
+            stmtInsert.execute("set names 'utf8mb4'");
+            String sql = "INSERT INTO " + this.urlsTable + " (url, tag, status)"
+                    + "VALUES(?,?,?)";
+
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            // Set the values
+            pstmt.setString(1, adLink);
+            pstmt.setString(2, tag);
+            pstmt.setInt(3, 2);
+            pstmt.executeUpdate();
+            System.out.println("------" + e.getMessage() + "------");
+        }
+    }
+
     private void scrapeUrls() {
         ///// Deleting existing products ///
         try {
             if (!tag.isEmpty()) {
-                String queryCheck = "DELETE FROM urls WHERE tag = ?";
+                String queryCheck = "DELETE FROM " + this.urlsTable + " WHERE tag = ?";
                 PreparedStatement st = connection.prepareStatement(queryCheck);
                 st.setString(1, tag);
                 int rs = st.executeUpdate();
@@ -339,7 +342,7 @@ public class gumtree implements Runnable {
             try {
                 Statement stmtInsert = connection.createStatement();
                 stmtInsert.execute("set names 'utf8'");
-                String sql = "INSERT INTO urls (url,tag)"
+                String sql = "INSERT INTO " + this.urlsTable + " (url,tag)"
                         + "VALUES(?,?)";
 
                 PreparedStatement pstmt = connection.prepareStatement(sql);
