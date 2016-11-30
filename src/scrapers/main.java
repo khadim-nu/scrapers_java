@@ -15,9 +15,9 @@ import org.jsoup.nodes.Document;
 public class main {
 
     public static void main(String[] args) throws IOException {
-
-                System.out.println(System.getProperty("file.encoding"));
-                System.exit(0);
+        System.setProperty("file.encoding", "UTF-8");
+        System.out.println(System.getProperty("file.encoding"));
+        System.exit(0);
         String tag = "for-sale";
 
         int pageFrom = 0;
@@ -71,7 +71,39 @@ public class main {
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
-        
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
+        pageFrom = pageTo;
+        pageTo = pageFrom + increment;
+        new gumtree(tag, pageFrom, pageTo);
+
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
@@ -111,10 +143,6 @@ public class main {
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
-        
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
 
         pageFrom = pageTo;
         pageTo = pageFrom + increment;
@@ -124,35 +152,6 @@ public class main {
         pageTo = pageFrom + increment;
         new gumtree(tag, pageFrom, pageTo);
 
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-
-        pageFrom = pageTo;
-        pageTo = pageFrom + increment;
-        new gumtree(tag, pageFrom, pageTo);
-        
-        
         System.out.println(pageFrom);
         System.out.println(pageTo);
         // System.exit(1);
