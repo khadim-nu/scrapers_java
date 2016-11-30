@@ -143,7 +143,7 @@ public class gumtree implements Runnable {
     }
 
     public void scrapeSingleUrl(String adLink, String domainURL_old) throws SQLException {
-        Document doc=null;
+        Document doc;
         try {
             doc = Jsoup.connect(adLink)
                     .header("Accept-Encoding", "gzip, deflate")
@@ -152,7 +152,7 @@ public class gumtree implements Runnable {
                     .timeout(1200000)
                     .followRedirects(true)
                     .get();
-            
+
             String ad_id = doc.getElementById("reportForm.advertId-1").attr("value");
 
             String name = doc.getElementsByClass("space-mbn").get(0).text();
@@ -220,9 +220,6 @@ public class gumtree implements Runnable {
 
 //                                     System.exit(1);
         } catch (Exception e) {
-            System.out.println(adLink);
-            
-            System.out.println(doc);
             Statement stmtInsert = connection.createStatement();
             stmtInsert.execute("set names 'utf8mb4'");
             String sql = "INSERT INTO " + this.urlsTable + " (url, tag, status)"
@@ -235,7 +232,6 @@ public class gumtree implements Runnable {
             pstmt.setInt(3, 2);
             pstmt.executeUpdate();
             System.out.println("------" + e.getMessage() + "------");
-            System.exit(1);
         }
     }
 
